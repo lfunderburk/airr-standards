@@ -29,6 +29,10 @@ Ontology:
 
 CURIEResolution:
   -
+    curie_prefix: ORCID
+    iri_prefix:
+      - "https://orcid.org/"
+  -
     curie_prefix: NCBITAXON
     iri_prefix:
       - "http://purl.obolibrary.org/obo/NCBITaxon_"
@@ -248,6 +252,21 @@ Study:
                 set: 1
                 subset: study
                 name: Contact information (data collection)
+        collected_by_pid:
+            type: string
+            description: >
+                Persistent identifier (represented as a CURIE) for the person identified in the collected_by field.
+                This should include a CURIE tag and a CURIE identifier that will resolve the PID to a persistent identifier for an individual
+                such as an ORCID ID.
+            title: Contact persistent identifier (data collection)
+            example: ORCID:0000-0002-1825-0097
+            x-airr:
+                miairr: important
+                nullable: true
+                adc-query-support: true
+                set: 1
+                subset: study
+                name: Contact persistent identifier (data collection)
         lab_name:
             type: string
             description: Department of data collector
