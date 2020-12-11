@@ -52,7 +52,7 @@ class Schema:
             raise KeyError('Info is an invalid schema definition name')
 
         # Load object definition
-        with resource_stream(__name__, 'specs/airr-schema.yaml') as f:
+        with resource_stream(__name__, 'specs/stats-api.yaml') as f:
             spec = yaml.load(f, Loader=yamlordereddictloader.Loader)
 
         try:
