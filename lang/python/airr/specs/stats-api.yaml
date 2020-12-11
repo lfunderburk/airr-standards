@@ -1,0 +1,448 @@
+info:
+  title: iReceptorPlus Statistics API
+  version: 0.3.0
+  description: >
+    Statistics API for the iReceptor Plus platform.
+  contact:
+    name: iReceptor Plus
+    url: 'https://www.ireceptor-plus.com'
+    email: info@ireceptor-plus.com
+
+servers:
+  - url: https://vdjserver.org/irplus/v1/stats
+    description: VDJServer Production server
+    variables:
+      basePath:
+        default: /irplus/v1/stats
+  - url: https://vdj-staging.tacc.utexas.edu/irplus/v1/stats
+    description: VDJServer Staging server
+    variables:
+      basePath:
+        default: /irplus/v1/stats
+  - url: https://stats-staging.ireceptor.org/irplus/v1/stats
+    description: iReceptor Stats Staging server
+    variables:
+      basePath:
+        default: /irplus/v1/stats
+
+components:
+  schemas:
+    info_object:
+      type: object
+      description: Provides information about the service and API
+      properties:
+        title:
+          type: string
+        version:
+          type: string
+        description:
+          type: string
+        contact: 
+          type: object
+          properties:
+            name:
+              type: string
+            url:
+              type: string
+            email:
+              type: string
+
+    count_array:
+      type: array
+      description: Array-based count representation
+      items: 
+        type: object
+        properties:
+          key:
+            type: string
+            example: key
+          count:
+            type: integer
+            example: 10
+
+    # Service info object. This is the object returned by the /info request,
+    # and provides information about the API service and its attributes and capabilities
+    service_info_object:
+      description: Provides information about the API service and its attributes and capabilities.
+      allOf:
+        - $ref: '#/components/schemas/info_object'
+        - type: object
+          properties:
+            api:
+              $ref: '#/components/schemas/info_object'
+              
+    repertoire_description_object:
+      type: object
+      required:
+        - repertoire_id
+      properties:
+        repertoire_id:
+          type: string
+          description: The reperotire on which to perform the statisitical analysis
+          example: REPID_4598
+          nullable: false
+        sample_processing_id:
+          type: string
+          description: >
+            The sample_processing_id on which to perform the analysis
+            If this is not provided then it all sample processing entities within
+            the repertoire are used to produce the requested statistical analysis.
+          example: SPID_1
+          nullable: false
+        data_processing_id:
+          type: string
+          description: >
+            The data processing ID on which to perform the analysis.
+            If this is not provided and there is more than one data processing entity attached to 
+            the repertoire then the primary_annotation is used if one exists. If there is more than
+            one data processing entity and there is no primary annotation, then all data processing
+            entities within the repertoire are used to produce the requested statistical analysis.
+          example: DPID_1
+          nullable: false
+
+    repertoire_description_array:
+      type: array
+      description: Array of repertoires on which to perform a set of statisical analyses.
+      items:
+        type: object
+        description: Repertoire filtering parameters
+        properties:
+          repertoire:
+            $ref: '#/components/schemas/repertoire_description_object'
+
+    count_statistics_array:
+      type: array
+      description: The field to count on for this repertoire
+      items:
+        type: string
+        enum:
+          - rearrangement_count
+          - duplicate_count
+          - rearrangement_count_productive
+          - duplicate_count_productive
+      example:
+        - rearrangement_count
+        - duplicate_count
+
+    junction_statistics_array:
+      type: array
+      description: The types of junction length stats requested (one of amino acid or nucleotide length)
+      items:
+        type: string
+        enum:
+          - junction_aa_length
+          - junction_length
+          - junction_aa_length_productive
+          - junction_length_productive
+      example:
+        - junction_aa_length
+        - junction_length
+        - junction_aa_length_productive
+        - junction_length_productive
+
+    gene_statistics_array:
+      type: array
+      description: The types of gene usage stats requested (one of V,D, or J subgroup, gene, or allele)
+      items:
+        type: string
+        enum:
+          - v_subgroup_unique
+          - v_subgroup_exists
+          - v_subgroup_unique_productive
+          - v_subgroup_exists_productive
+          - v_gene_unique
+          - v_gene_exists
+          - v_gene_unique_productive
+          - v_gene_exists_productive
+          - v_call_unique
+          - v_call_exists
+          - v_call_unique_productive
+          - v_call_exists_productive
+          - d_subgroup_unique
+          - d_subgroup_exists
+          - d_subgroup_unique_productive
+          - d_subgroup_exists_productive
+          - d_gene_unique
+          - d_gene_exists
+          - d_gene_unique_productive
+          - d_gene_exists_productive
+          - d_call_unique
+          - d_call_exists
+          - d_call_unique_productive
+          - d_call_exists_productive
+          - j_subgroup_unique
+          - j_subgroup_exists
+          - j_subgroup_unique_productive
+          - j_subgroup_exists_productive
+          - j_gene_unique
+          - j_gene_exists
+          - j_gene_unique_productive
+          - j_gene_exists_productive
+          - j_call_unique
+          - j_call_exists
+          - j_call_unique_productive
+          - j_call_exists_productive
+          - c_subgroup_unique
+          - c_subgroup_exists
+          - c_subgroup_unique_productive
+          - c_subgroup_exists_productive
+          - c_gene_unique
+          - c_gene_exists
+          - c_gene_unique_productive
+          - c_gene_exists_productive
+          - c_call_unique
+          - c_call_exists
+          - c_call_unique_productive
+          - c_call_exists_productive
+      example:
+        - v_subgroup_unique
+        - v_gene_unique
+        - d_subgroup_unique
+        - d_gene_unique
+        - c_gene_unique
+  
+    statistic_response_array:
+      type: array
+      description: Array of statistics that were requested.
+      items:
+        type: object
+        properties:
+          statistic_name:
+            type: string
+            description: >
+              The statistic name that the statistics data refers to. This is a controlled vocabulary string that is defined in the statistic call.
+            example: statistic_name
+          total:
+            type: integer
+            description: Total number of elements found in the repertoire.
+            example: 30
+          data:
+            $ref: '#/components/schemas/count_array'
+
+    stats_response_object:
+      type: object
+      properties:
+        Info:
+          $ref: '#/components/schemas/info_object'
+        Result:
+          type: array
+          description: Array of count objects, one per repertoire
+          items:
+            type: object
+            properties:
+              repertoire:
+                $ref: '#/components/schemas/repertoire_description_object'
+              statistics:
+                $ref: '#/components/schemas/statistic_response_array'
+
+  responses:
+    error_response:
+      description: General error response.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              Info:
+                $ref: '#/components/schemas/info_object'
+              Message:
+                type: string
+                description: Detail about the error
+
+    count_response:
+      description: Response from a /count query
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/stats_response_object'
+
+    junction_length_response:
+      description: Response from a /junction_length query
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/stats_response_object'
+
+    gene_usage_response:
+      description: Response from a /gene_usage query
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/stats_response_object'
+
+paths:
+  /:
+    get:
+      description: Service heartbeat.
+      operationId: get_service_status
+      responses:
+        '200':
+          description: Service is up.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+
+  /info:
+    get:
+      description: Service information.
+      operationId: get_service_info
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/service_info_object'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/responses/error_response'
+                
+  /rearrangement/count:
+    post:
+      description: Count of rearrangements for repertoire(s)
+      operationId: rearrangement_count
+      tags:
+        - rearrangements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                auth_token: 
+                  type: string
+                repertoires:
+                  $ref: '#/components/schemas/repertoire_description_array'
+                statistics:
+                  $ref: '#/components/schemas/count_statistics_array'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/count_response'
+        default:
+          $ref: '#/components/responses/error_response'
+
+  /rearrangement/junction_length:
+    post:
+      description: >
+        Perform a junction length distribution analysis for the rearrangements that belong to the specified repertoire (and/or sample_processing and data processing entity).
+      operationId: rearrangement_junction_length
+      tags:
+        - rearrangements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                auth_token: 
+                  type: string
+                repertoires:
+                  $ref: '#/components/schemas/repertoire_description_array'
+                statistics:
+                  $ref: '#/components/schemas/junction_statistics_array'
+      responses:
+        '200':
+          $ref: '#/components/responses/junction_length_response'
+        default:
+          $ref: '#/components/responses/error_response'
+
+  /rearrangement/gene_usage:
+    post:
+      description: >
+        Perform a gene usage analysis for the rearrangementes that belong to the specified repertoire (and/or sample_processing and data_processing entity).
+      operationId: rearrangement_gene_usage
+      tags:
+        - rearrangements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                auth_token: 
+                  type: string
+                repertoires:
+                  $ref: '#/components/schemas/repertoire_description_array'
+                statistics:
+                  $ref: '#/components/schemas/gene_statistics_array'
+      responses:
+        '200':
+          $ref: '#/components/responses/gene_usage_response'
+        default:
+          $ref: '#/components/responses/error_response'
+
+  /clone/count:
+    post:
+      description: Count of clones for repertoire(s)
+      operationId: clone_count
+      tags:
+        - clones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                auth_token: 
+                  type: string
+                repertoires:
+                  $ref: '#/components/schemas/repertoire_description_array' 
+                statistics:
+                  $ref: '#/components/schemas/count_statistics_array'
+      responses:
+        '200':
+          $ref: '#/components/responses/count_response'
+        default:
+          $ref: '#/components/responses/error_response'
+
+  /clone/junction_length:
+    post:
+      description: >
+        Perform a junction length distribution analysis for the clones that belong to the specified repertoire (and/or sample_processing and data processing entity).
+      operationId: clone_junction_length
+      tags:
+        - clones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                auth_token: 
+                  type: string
+                repertoires:
+                  $ref: '#/components/schemas/repertoire_description_array'
+                statistics:
+                  $ref: '#/components/schemas/junction_statistics_array'
+      responses:
+        '200':
+          $ref: '#/components/responses/junction_length_response'
+        default:
+          $ref: '#/components/responses/error_response'
+
+  /clone/gene_usage:
+    post:
+      description: >
+        Perform a gene usage analysis for the clones that belong to the specified repertoires (and/or sample_processing and data_processing entity).
+      operationId: clone_gene_usage
+      tags:
+        - clones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                auth_token: 
+                  type: string
+                repertoires:
+                  $ref: '#/components/schemas/repertoire_description_array'
+                statistics:
+                  $ref: '#/components/schemas/gene_statistics_array'
+      responses:
+        '200':
+          $ref: '#/components/responses/gene_usage_response'
+        default:
+          $ref: '#/components/responses/error_response'
